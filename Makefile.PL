@@ -5,8 +5,12 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME              => 'Statistics::Zed',
     VERSION_FROM      => 'lib/Statistics/Zed.pm', # finds $VERSION
-    PREREQ_PM         => { 'Statistics::Distributions' => 1.02, 'Class::OOorNo' => 0},
+    PREREQ_PM         => { 
+		'Class::OOorNo' => 0,
+		'Math::Cephes' => 0.44,
+		'Statistics::Distributions' => 1.02,
+	},
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/Statistics/Zed.pm', # retrieve abstract from module
-       AUTHOR         => 'rgarton <rgarton@cpan.org>') : ()),
+       AUTHOR         => 'rgarton <rgarton AT cpan DOT org>') : ()),
 );

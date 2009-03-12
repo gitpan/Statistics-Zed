@@ -1,5 +1,11 @@
 Revision history for Perl extension Statistics::Zed.
 
+0.02 2009 March 
+	- uses Math::Cephes instead of Statistics::Distributions of z2p
+	- p2z function, using Math::Cephes (hence the above change)
+	- aliases for functions, removing underscores
+	- s_precision and p_precision attributes are now precision_s and precision_p, for some mild increase in aesthetic pleasure
+
 0.01  Sat Dec  2 14:02:18 2006
 	- original version; created by h2xs 1.23 with options
 		-AX --skip-exporter --use-new-tests -n Statistics::Zed
