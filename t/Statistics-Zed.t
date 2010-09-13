@@ -1,15 +1,33 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl Statistics-Zed.t'
+use strict;
+use warnings;
+use Test::More tests => 7;
+use constant EPS => 1e-2;
 
-#########################
-
-# change 'tests => 1' to 'tests => last_test_to_print';
-
-use Test::More tests => 1;
 BEGIN { use_ok('Statistics::Zed') };
 
-#########################
+my $zed = Statistics::Zed->new(ccorr => 1, tails => 2,);
+isa_ok($zed, 'Statistics::Zed');
 
-# Insert your test code below, the Test::More module is use()ed here so read
-# its man page ( perldoc Test::More ) for help writing this test script.
+my %refdat = (
+	z_value => 1.625,
+	p_value => 0.10416
+);
 
+my %res = ();
+
+eval { ($res{'z_value'}, $res{'p_value'}) = $zed->score(
+	observed => 12,
+      expected => 5, # or key stdev or variance
+      error => 4,
+);};
+ok(!$@);
+
+foreach (qw/z_value p_value/) {
+    ok(defined $res{$_} );
+    ok(equal($res{$_}, $refdat{$_}), "$_  $res{$_} = $refdat{$_}");
+}
+
+sub equal {
+    return 1 if $_[0] + EPS > $_[1] and $_[0] - EPS < $_[1];
+    return 0;
+}

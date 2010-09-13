@@ -1,8 +1,8 @@
 Revision history for Perl extension Statistics::Zed.
 
-0.03 2010 Sept
+0.03x 2010 Sept
 	- solving distribution issues
-	- removed z2r and r2z functions
+	- removed all statistics conversion methods, e.g., z2r and r2z functions
 
 0.02x 2009 March-May 
 	- uses Math::Cephes instead of Statistics::Distributions of z2p

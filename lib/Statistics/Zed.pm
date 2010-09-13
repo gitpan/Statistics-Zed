@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp qw(croak);
 use vars qw($VERSION);
-$VERSION = 0.03;
+$VERSION = 0.032;
 use Statistics::Lite qw(:all);
 use Statistics::Descriptive;
 use Statistics::Distributions;
@@ -18,7 +18,7 @@ Statistics::Zed - Basic ztest/zscore, with optional continuity correction
 
 =head1 SYNOPSIS
 
- use Statistics::Zed 0.03;
+ use Statistics::Zed 0.032;
 
  my $zed = Statistics::Zed->new(
     ccorr    => 1,
@@ -55,7 +55,7 @@ Calculates a standard, run-of-the-mill z-score: the ratio of an observed deviati
 
  $zed = Statistics::Zed->new();
 
-Returns a Statistics::Zed object. Accepts setting of any of the L<OPTIONS|OPTIONS>.
+Returns a Statistics::Zed object. Accepts setting of any of the OPTIONS.
 
 =cut
 
@@ -119,7 +119,7 @@ sub ztest {
     return undef if !$exp_dev;
     $z = $obs_dev / $exp_dev;
  
-    $p = $self->z_2_p($z, $self->{'tails'});
+    $p = $self->z2p($z, $self->{'tails'});
     $z = sprintf('%.' . $self->{'precision_s'} . 'f', $z) if $self->{'precision_s'};
 
     return wantarray ? ($z, $p, $obs_dev, $exp_dev) : $z;
@@ -165,7 +165,7 @@ sub zscore {
     return undef if !$exp_dev;
     $z = $obs_dev / $exp_dev;
  
-    $p = $self->z_2_p($z, $self->{'tails'});
+    $p = $self->z2p($z, $self->{'tails'});
     $z = sprintf('%.' . $self->{'precision_s'} . 'f', $z) if $self->{'precision_s'};
     
     return wantarray ? ($z, $p, $obs_dev, $exp_dev) : $z;
@@ -177,7 +177,7 @@ sub zscore {
  $p = $zed->z2p($z)
  $p = $zed->z2p($z, 1)
 
-I<Alias>: C<z_2_p>, C<p_value>
+I<Alias>: C<p_value>
 
 Send a I<z>-value, get its associated I<p>-value, 2-tailed by default, or depending on what the value of $zed->{'tails'} is, or what is sent as the second argument, if anything. Uses L<Math::Cephes|Math::Cephes> C<ndtr>.
 
@@ -187,10 +187,7 @@ Send a I<z>-value, get its associated I<p>-value, 2-tailed by default, or depend
 sub z2p {
 #-----------------------------------------------
     my ($self, $z, $tails) = @_;
-    #my $p = (1 - ndtr(abs($z))); # Math::Cephes function
 	my $p = Statistics::Distributions::uprob (abs($z));
-	#print "$z\t$p\n"; 
-	
     $p *= 2 if $tails and $tails == 2;
 	$p = Statistics::Distributions::precision_string($p);
     $p = 1 if $p > 1;
@@ -198,88 +195,7 @@ sub z2p {
     $p = sprintf('%.' . $self->{'precision_p'} . 'f', $p) if $self->{'precision_p'};
     return $p;
 }
-*z_2_p = \&z2p;
 *p_value = \&z2p;
-
-=head3 p2z
-
- $z = $zed->p2z($p)
- $z = $zed->p2z($p, 2) # 2-tailed probability
-
-I<Alias>: C<p_2_z>
-
-Returns the I<z>-value associated with a I<p>-value, using L<Math::Cephes|Math::Cephes> C<ndtri> function ("phi"). If the class attribute C<tails> has been set to 2, or if the second argument equals 2 (indicating a 2-tailed probability value), the I<p>-value is firstly divided by 2. The absolute value of C<z> is always returned. However, if C<p> equals zero or is undefined, returns undef.
-
-=cut
-
-#-----------------------------------------------
-sub p2z {
-#-----------------------------------------------
-    my ($self, $p, $tails) = @_;
-
-    my $z;
-    
-    if (!$p) {
-        $z = undef;
-    }
-    elsif ($p == 1)  {
-        $z = 0;
-    }
-    else {
-        $p = $p/2 if ($tails and $tails == 2) || $self->{'tails'} == 2;
-        $z = abs(ndtri($p)); # Math::Cephes function
-    }
-
-    return $z;
-}
-*p_2_z = \&p2z;
-
-
-=head3 z2chi
-
- $chi = $zed->z2chi($z) 
-
-I<Alias>: C<z_2_chi>
-
-Send a I<z>-value, get back a I<chi>-value (the square of the thing ...).
-
-=cut
-
-#-----------------------------------------------
-sub z2chi {
-#-----------------------------------------------
-    my ($self, $z) = @_;
-    return $z**2;
-}
-*z_2_chi = \&z2chi;
-
-=head3 chi2z
-
- $z = $zed->chi2z($chi)
- $z = $zed->chi2z($chi, $df) 
-
-I<Alias>: C<chi_2_z>
-
-Send a I<chi>-value, get back a I<z>-value. If no degrees-of-freedom after the chi-value (as above), you get back the square-root of the thing. Otherwise:
-
-=for html <p>&nbsp;&nbsp;&nbsp;<i>Z</i> ~= &not;/(2CHI) &ndash;  &not;/(2DF &ndash; 1)</p>
-
-Note that a negative I<Z>-value returned by this method indicates that the chi-square is I<smaller> than expected for so many dfs; the I<p>-value for this I<Z>-value indicates how much smaller.
-
-=cut
-
-#-----------------------------------------------
-sub chi2z {
-#-----------------------------------------------
-    my ($self, $chi, $df) = @_;
-    if ($df) {
-        return sqrt(2 * $chi) - sqrt( 2 * $df - 1);
-    }
-    else {
-        return sqrt($chi);
-    }
-}
-*chi_2_z = \&chi2z;
 
 # Apply the continuity correction to the deviation, e.g. of (x - MCE) in numerator of z-score, if variance is calculated binomially (as hit/miss, not continuous):
 sub ccorr {
@@ -293,33 +209,6 @@ sub ccorr {
        return $dev; # thanks for nothing
    }
 }
-
-=head3 vals2z
-
- $z_aref = $zed->vals2z($chi)
- $z_aref = $zed->vals2z($chi, $df) 
-
-I<Alias>: C<vals_2_z>
-
-Given an array (reference) of numberical values, returns them as an array of standard scores (mean = 0, SD = 1).
-
-=cut
-
-sub vals2z {
-   my $self = shift;
-   my $vals = ref($_[0]) ? shift : [$_[0]];
-   
-   if (ref $vals) {
-     my @scores = ();
-     my $mean = mean(@{$vals});
-     my $var = variance(@{$vals});
-     foreach (@{$vals}) {
-        push @scores, $var ? ($_ - $mean) / sqrt($var) : 0;
-     }
-     return\@scores;
-   }
-}
-*vals_2_z = \&vals2z;
 
 =head2 dump
 
@@ -402,7 +291,6 @@ sub series_update {
             croak "No variance offered in series_update for calculating deviation";
         }
     }
- 	#print("$_\t$args->{$_}\n") foreach qw/observed expected variance z_value/;
 	foreach (qw/observed expected variance z_value/) {
     	$self->{'series_stat'}->{$_}->add_data($args->{$_}) if defined $args->{$_};
 	}
@@ -424,7 +312,6 @@ sub series_test {
     $self->{'series'}->{'expected'} = $e;
     $self->{'series'}->{'z_value'} = $z;# || 0;
     $self->{'series'}->{'p_value'} = $pz;# || 1;
-    #$self->{'series'}->{'r_value'} = $self->z_2_r($z);
     $self->{'series'}->{'obs_dev'} = $obs_dev;
     $self->{'series'}->{'stdev'} = $stdev;
     $self->{'series'}->{'variance'} = $v;
@@ -445,7 +332,6 @@ Prints to STDOUT a line giving the z_value and p_value for the series.
 sub series_dump {
     my ($self) = @_;
     print "Z (N = $self->{'series'}->{'samplings'}) = $self->{'series'}->{'z_value'}, $self->{'tails'}p = $self->{'series'}->{'p_value'}\n";
-    
 }
 
 1;
@@ -453,7 +339,7 @@ __END__
 
 =head1 OPTIONS
 
-The following can be set in the call to L<new|new> or L<test|test> or L<score|score>.
+The following can be set in the call to C<new> or C<test> or C<score>.
 
 =head2 ccorr
 
@@ -487,7 +373,7 @@ Other distributions.
 
 =over 4
 
-=item Copyright (c) 2006-2009 R Garton
+=item Copyright (c) 2006-2010 R Garton
 
 rgarton AT cpan DOT org
 
