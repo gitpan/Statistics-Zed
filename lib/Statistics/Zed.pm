@@ -5,11 +5,10 @@ use strict;
 use warnings;
 use Carp qw(croak);
 use vars qw($VERSION);
-$VERSION = 0.032;
+$VERSION = 0.04;
 use Statistics::Lite qw(:all);
 use Statistics::Descriptive;
 use Statistics::Distributions;
-use Math::Cephes qw(:dists);
 use String::Util qw(hascontent); 
 
 =head1 NAME
@@ -18,30 +17,32 @@ Statistics::Zed - Basic ztest/zscore, with optional continuity correction
 
 =head1 SYNOPSIS
 
- use Statistics::Zed 0.032;
+ use Statistics::Zed 0.04;
 
- my $zed = Statistics::Zed->new(
+ $zed = Statistics::Zed->new(
     ccorr    => 1,
     tails    => 2,
     precision_s => 5,
     precision_p => 5,
  );
 
- my ($z_value, $p_value, $observed_deviation, $standard_deviation) = 
-    $zed->score( # or score
+ ($z_value, $p_value, $observed_deviation, $standard_deviation) = 
+    $zed->score( # or zscore
         observed => $obs,
         expected => $exp, # or key stdev or variance
         error => $variance,
  );
 
- my $deviate = $zed->test( # or ztest
+ $deviate = $zed->test( # or ztest
         observed => $obs,
         expected => $exp,
         error => $variance, # or key stdev or variance
         samplings => $samplings,
  );
 
- my $p_value = $zed->p_value($deviate); # or z2p
+ $p_value = $zed->z2p(value => $z_value, tails => 1|2);
+ 
+ $z_value = $zed->p2z(value => $p_value, tails => 1|2);
 
 =head1 DESCRIPTION
 
@@ -114,12 +115,12 @@ sub ztest {
     croak "Need to define observed ($self->{'observed'}) and expected ($self->{'expected'}) values for ztest" if !hascontent($self->{'observed'}) || !hascontent($self->{'expected'});
 
     $obs_dev = $self->{'observed'} - $self->{'expected'};
-    $obs_dev = ccorr($obs_dev) if $self->{'ccorr'};
+    $obs_dev = _ccorr($obs_dev) if $self->{'ccorr'};
     $exp_dev = _exp_dev($self, 1);
     return undef if !$exp_dev;
     $z = $obs_dev / $exp_dev;
  
-    $p = $self->z2p($z, $self->{'tails'});
+    $p = $self->z2p(value => $z, tails => $self->{'tails'});
     $z = sprintf('%.' . $self->{'precision_s'} . 'f', $z) if $self->{'precision_s'};
 
     return wantarray ? ($z, $p, $obs_dev, $exp_dev) : $z;
@@ -160,12 +161,12 @@ sub zscore {
     croak "Need to define observed ($self->{'observed'}) and expected ($self->{'expected'}) values for zscore" if !hascontent($self->{'observed'}) || !hascontent($self->{'expected'});
 
     $obs_dev = $self->{'observed'} - $self->{'expected'};
-    $obs_dev = ccorr($obs_dev) if $self->{'ccorr'};
+    $obs_dev = _ccorr($obs_dev) if $self->{'ccorr'};
     $exp_dev = _exp_dev($self, 0);
     return undef if !$exp_dev;
     $z = $obs_dev / $exp_dev;
  
-    $p = $self->z2p($z, $self->{'tails'});
+    $p = $self->z2p(value => $z, tails => $self->{'tails'});
     $z = sprintf('%.' . $self->{'precision_s'} . 'f', $z) if $self->{'precision_s'};
     
     return wantarray ? ($z, $p, $obs_dev, $exp_dev) : $z;
@@ -174,21 +175,23 @@ sub zscore {
 
 =head3 z2p
 
- $p = $zed->z2p($z)
- $p = $zed->z2p($z, 1)
+ $p = $zed->z2p(value => $z); # assumes 2-tailed
+ $p = $zed->z2p(value => $z, tails => 1);
 
 I<Alias>: C<p_value>
 
-Send a I<z>-value, get its associated I<p>-value, 2-tailed by default, or depending on what the value of $zed->{'tails'} is, or what is sent as the second argument, if anything. Uses L<Math::Cephes|Math::Cephes> C<ndtr>.
+Send a I<z>-value, get its associated I<p>-value, 2-tailed by default, or depending on what the value of $zed->{'tails'} is, or what is sent as the second argument, if anything.
 
 =cut
 
 #-----------------------------------------------
 sub z2p {
 #-----------------------------------------------
-    my ($self, $z, $tails) = @_;
-	my $p = Statistics::Distributions::uprob (abs($z));
-    $p *= 2 if $tails and $tails == 2;
+    my $self = shift;
+    my $args = ref $_[0] ? $_[0] : {@_};
+    $args->{'tails'} ||= 2;
+	my $p = Statistics::Distributions::uprob (abs($args->{'value'}));
+    $p *= 2 if $args->{'tails'} == 2;
 	$p = Statistics::Distributions::precision_string($p);
     $p = 1 if $p > 1;
     $p = 0 if $p < 0;
@@ -197,8 +200,42 @@ sub z2p {
 }
 *p_value = \&z2p;
 
+=head3 p2z
+
+ $z_value = $zed->p2z(value => $p) # the p-value is assumed to be 2-tailed
+ $z_value = $zed->p2z(value => $p, tails => 1) # 1-tailed probability
+
+Returns the I<z>-value associated with a I<p>-value, using L<Math::Cephes|Math::Cephes> C<ndtri> function ("phi"). If the C<tails> attribute equals 2 (indicating a 2-tailed probability value), the I<p>-value is firstly divided by 2. A check is firstly made to ensure that what is sent as a probability actually looks like a probability.
+
+=cut
+
+#-----------------------------------------------
+sub p2z { # This utility might be moved to a Statistics::Convert module later ...
+#-----------------------------------------------
+    my $self = shift;
+    my $args = ref $_[0] ? $_[0] : {@_};
+    my $p_val = $args->{'value'};
+    croak __PACKAGE__, "::p2z The value sent as a p-value ($p_val) does not appear to be valid" if !_valid_p($p_val);
+    $args->{'tails'} ||= 2;
+    my $z_val;
+    # Avoid ndtri errors by first accounting for 0 and 1 ...
+    if (!$p_val) {
+        $z_val = '';
+    }
+    elsif ($p_val == 1)  {
+        $z_val = 0;
+    }
+    else {
+        $p_val /= 2 if $args->{'tails'} == 2; # p-value should be for one tail of the distribution
+        require Math::Cephes;
+        $z_val = Math::Cephes::ndtri(1 - $p_val); # for the area within the p_value'd tails
+    }
+    return $z_val;
+}
+
+
 # Apply the continuity correction to the deviation, e.g. of (x - MCE) in numerator of z-score, if variance is calculated binomially (as hit/miss, not continuous):
-sub ccorr {
+sub _ccorr {
    my $dev = shift;
    if ($dev) {
        my $c = abs($dev) - .5;
@@ -231,7 +268,7 @@ sub _exp_dev {
             sqrt($self->{'variance'}) :
             $self->{'error'} ?
                 $self->{'error'} :
-                    croak "Need a stdev or variance value for z-testing";##return undef;##
+                    croak "Need a standard deviation or variance value for z-testing";##return undef;##
     if ($self->{'test'}) {
         croak "Need non-zero and positive number of samplings/units" if ! $self->{'samplings'} or $self->{'samplings'} < 0;
         $exp_dev = $stdev / sqrt($self->{'samplings'});
@@ -334,6 +371,14 @@ sub series_dump {
     print "Z (N = $self->{'series'}->{'samplings'}) = $self->{'series'}->{'z_value'}, $self->{'tails'}p = $self->{'series'}->{'p_value'}\n";
 }
 
+#-----------------------------------------------
+sub _valid_p {
+#-----------------------------------------------
+    my $p = shift;
+    return (($p !~ /^0?\.\d+$/) && ($p !~ /^\d+?\.[\de-]+/ )) || ($p < 0 || $p > 1) ? $p == 1 ? 1 : 0 : 1;
+}
+
+
 1;
 __END__
 
@@ -359,9 +404,7 @@ Precision of the associated I<p>-value. Default = 0 - you get all decimal values
 
 =head1 SEE ALSO
 
-L<Math::Cephes|Math::Cephes> : the C<ndtr> and C<ndtri> functions are used here for determining probability or I<z>-values, respectively. (This is only in preference to using Statistics::Distributions so that whether we want a I<p>- or I<z>value, the same class of methods is used.)
-
-L<Statistics::Distributions|Statistics::Distributions> : the C<precision_string> method is used here for reporting probability.
+L<Statistics::Distributions|Statistics::Distributions> : C<uprob> function, and C<precision_string> method is used here for reporting probability.
 
 L<Statistics::Sequences|Statistics::Sequences> : for application of this module.
 

@@ -1,6 +1,6 @@
 ---
 name: Statistics-Zed
-version: 0.032
+version: 0.04
 author:
   - 'Roderick Garton <rgarton@cpan.org>'
 abstract: 'Basic ztest/zscore, with optional continuity correction'
@@ -18,7 +18,7 @@ configure_requires:
 provides:
   Statistics::Zed:
     file: lib/Statistics/Zed.pm
-    version: 0.032
+    version: 0.04
 generated_by: Module::Build version 0.340201
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
