@@ -11,6 +11,7 @@ WriteMakefile(
 	'Statistics::Distributions' => 1.02,
         'Statistics::Descriptive' => 2.6,
         'String::Util' => '0.11',
+        'Statistics::Lite' => '3.2',
 	},
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/Statistics/Zed.pm', # retrieve abstract from module

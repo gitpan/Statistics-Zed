@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp qw(croak);
 use vars qw($VERSION);
-$VERSION = 0.04;
+$VERSION = 0.05;
 use Statistics::Lite qw(:all);
 use Statistics::Descriptive;
 use Statistics::Distributions;
@@ -17,7 +17,7 @@ Statistics::Zed - Basic ztest/zscore, with optional continuity correction
 
 =head1 SYNOPSIS
 
- use Statistics::Zed 0.04;
+ use Statistics::Zed 0.05;
 
  $zed = Statistics::Zed->new(
     ccorr    => 1,

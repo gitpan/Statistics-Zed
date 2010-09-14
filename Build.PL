@@ -13,8 +13,9 @@ my $builder = Module::Build->new(
 	'Statistics::Distributions' => 1.02,
         'Statistics::Descriptive' => 2.6,
         'String::Util' => '0.11',
+        'Statistics::Lite' => '3.2',
     },
-    add_to_cleanup      => [ 'Statistics-Zed-0.03-*' ],
+    add_to_cleanup      => [ 'Statistics-Zed-0.05-*' ],
 );
 
 $builder->create_build_script();
