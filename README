@@ -1,4 +1,4 @@
-Statistics-Zed version 0.03
+Statistics-Zed version 0.06
 =================================
 
 Basic z-test/-score, with continuity corrections,
@@ -13,11 +13,12 @@ To install this module type the following:
    make test
    make install
 
+Or Build.pl it instead.
+
 DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-Class::OOorNO
 Math::Cephes
 Statistics::Descriptive
 Statistics::Distributions

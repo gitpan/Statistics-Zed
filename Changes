@@ -1,8 +1,23 @@
 Revision history for Perl extension Statistics::Zed.
 
+0.06 2010 Oct
+    - lack of a variance value does not throw a croak but returns zero.
+    - removed ztest method - send stdev divided by sqrt(N) to zscore instead;
+	- series_test() returns same values and accepts same args as basic test,
+	- $z_value = $zed->p2z($p) - don't have to use named args here, as already in 'z2p'
+	- can send just a single value to series_update(), unkeyed, too
+	- no argument "error" recognized - use "variance" or "stdev"
+
+0.05 2010 Sept
+	- clean-up error messages to prevent "undef" error
+
+0.04 2010
+    - p2z sub
+    - distribution issues
+
 0.03x 2010 Sept
 	- solving distribution issues
-	- removed all statistics conversion methods, e.g., z2r and r2z functions
+	- removed statistics conversion methods: z2r, r2z, chi2z, z2chi
 
 0.02x 2009 March-May 
 	- uses Math::Cephes instead of Statistics::Distributions of z2p

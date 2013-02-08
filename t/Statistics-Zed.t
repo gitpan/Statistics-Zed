@@ -18,8 +18,8 @@ my %res = ();
 
 eval { ($res{'z_value'}, $res{'p_value'}) = $zed->score(
 	observed => 12,
-      expected => 5,
-      error => 4,
+    expected => 5,
+    stdev => 4,
 );};
 ok(!$@);
 
