@@ -9,13 +9,13 @@ my $builder = Module::Build->new(
     dist_version_from   => 'lib/Statistics/Zed.pm',
     build_requires => {
         'Test::More' => 0,
-	    'Math::Cephes' => 0.44,
-	    'Statistics::Distributions' => 1.02,
-        'Statistics::Descriptive' => 2.6,
+	    'Math::Cephes' => '0.44',
+	    'Statistics::Distributions' => '1.02',
+        'Statistics::Descriptive' => '2.6',
         'String::Util' => '0.11',
         'Statistics::Lite' => '3.2',
     },
-    add_to_cleanup      => [ 'Statistics-Zed-0.06-*' ],
+    add_to_cleanup      => [ 'Statistics-Zed-0.07-*' ],
 );
 
 $builder->create_build_script();

@@ -1,4 +1,4 @@
-Statistics-Zed version 0.06
+Statistics-Zed version 0.07
 =================================
 
 Basic z-test/-score, with continuity corrections,
@@ -25,7 +25,7 @@ Statistics::Distributions
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2006-2009 by R. Garton
+Copyright (C) 2006-2013 by R. Garton
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

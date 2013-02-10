@@ -7,9 +7,9 @@ WriteMakefile(
     VERSION_FROM      => 'lib/Statistics/Zed.pm', # finds $VERSION
     PREREQ_PM         => { 
         'Test::More' => 0,
-	'Math::Cephes' => 0.44,
-	'Statistics::Distributions' => 1.02,
-        'Statistics::Descriptive' => 2.6,
+	'Math::Cephes' => '0.44',
+	'Statistics::Distributions' => '1.02',
+        'Statistics::Descriptive' => '2.6',
         'String::Util' => '0.11',
         'Statistics::Lite' => '3.2',
 	},

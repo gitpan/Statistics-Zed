@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp qw(croak);
 use vars qw($VERSION);
-$VERSION = 0.06;
+$VERSION = 0.07;
 use Math::Cephes qw(:dists);
 use Statistics::Lite qw(:all);
 use Statistics::Descriptive;
@@ -19,7 +19,7 @@ Statistics::Zed - Basic deviation ratio: observed less expected (with optional c
 
 =head1 SYNOPSIS
 
- use Statistics::Zed 0.06;
+ use Statistics::Zed 0.07;
 
  $zed = Statistics::Zed->new(
     ccorr    => 1, 

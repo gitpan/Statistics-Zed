@@ -1,6 +1,8 @@
 Revision history for Perl extension Statistics::Zed.
 
-0.06 2010 Oct
+0.07 - cope with dist probs
+
+0.06 2013 Oct
     - lack of a variance value does not throw a croak but returns zero.
     - removed ztest method - send stdev divided by sqrt(N) to zscore instead;
 	- series_test() returns same values and accepts same args as basic test,
