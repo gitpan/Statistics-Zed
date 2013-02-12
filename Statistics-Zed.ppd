@@ -1,7 +1,0 @@
-<SOFTPKG NAME="Statistics-Zed" VERSION="0.07">
-    <ABSTRACT>Basic zed stuff</ABSTRACT>
-    <AUTHOR>Roderick Garton</AUTHOR>
-    <IMPLEMENTATION>
-        <CODEBASE HREF="PPM-Statistics-Zed-0.07.tar.gz" />
-    </IMPLEMENTATION>
-</SOFTPKG>
