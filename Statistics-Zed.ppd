@@ -1,0 +1,7 @@
+<SOFTPKG NAME="Statistics-Zed" VERSION="0.072">
+    <ABSTRACT>Basic deviation ratio: observed less expected (with optional continuity correction) divided by root variance</ABSTRACT>
+    <AUTHOR>Roderick Garton</AUTHOR>
+    <IMPLEMENTATION>
+        <CODEBASE HREF="PPM-Statistics-Zed-0.072.tar.gz" />
+    </IMPLEMENTATION>
+</SOFTPKG>

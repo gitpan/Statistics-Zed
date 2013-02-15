@@ -1,0 +1,29 @@
+---
+abstract: 'Basic deviation ratio: observed less expected (with optional continuity correction) divided by root variance'
+author:
+  - 'Roderick Garton <rgarton@cpan.org>'
+build_requires:
+  Test::More: 0
+configure_requires:
+  Module::Build: 0.36
+generated_by: 'Module::Build version 0.3624'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Statistics-Zed
+provides:
+  Statistics::Zed:
+    file: lib/Statistics/Zed.pm
+    version: 0.072
+requires:
+  Math::Cephes: 0.44
+  Scalar::Util: 1.23
+  Statistics::Descriptive: 2.6
+  Statistics::Distributions: 1.02
+  Statistics::Lite: 3.2
+  String::Util: 0.11
+  perl: v5.6.0
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.072

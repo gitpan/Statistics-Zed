@@ -1,0 +1,34 @@
+Statistics-Zed version 0.072
+=================================
+
+Basic z-test/-score, with continuity corrections,
+and transformations.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+Or Build.pl it instead.
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+Math::Cephes
+Statistics::Descriptive
+Statistics::Distributions
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2006-2013 by R. Garton
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+
